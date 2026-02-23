@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 import TunerPage from "./pages/TunerPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
+import ChordsPage from "./pages/ChordsPage.jsx";
 
 // ═══════════════════════════════════════════════════════════════
 //  FretForge — Main Application Shell
@@ -144,14 +145,7 @@ function Home() { return <LandingPage />; }
 // ─── Placeholder Pages ───────────────────────────────────────
 function Tuner() { return <TunerPage />; }
 
-function Chords() {
-  return (
-    <div className="page"><div className="container">
-      <h2>🤘 Chord Library</h2>
-      <p className="mono" style={{ color: "var(--text-muted)" }}>Phase 1 — Coming soon. Interactive chord diagrams with fretboard display.</p>
-    </div></div>
-  );
-}
+function Chords() { return <ChordsPage />; }
 
 function Practice() {
   return (
