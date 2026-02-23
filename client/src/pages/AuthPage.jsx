@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { AuthProvider, useAuth } from '../hooks/useAuth'
 
 // ═══════════════════════════════════════════════════════════════
 //  FretForge — Auth Page
