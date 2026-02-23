@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate 
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import TunerPage from "./pages/TunerPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
 
 // ═══════════════════════════════════════════════════════════════
 //  FretForge — Main Application Shell
@@ -137,94 +138,8 @@ function Nav() {
   );
 }
 
-// ─── Home Page ───────────────────────────────────────────────
-function Home() {
-  const { isAuthenticated, user } = useAuth();
-
-  return (
-    <div className="page home">
-      <div className="container">
-        <div className="hero">
-          <h1 className="hero-title">
-            <span className="hero-icon">🔥</span>
-            FretForge
-          </h1>
-          <p className="hero-subtitle mono">
-            {isAuthenticated
-              ? `Welcome back, ${user.username} — Lv${user.level} · ${user.xp} XP`
-              : "Open-source guitar learning companion"}
-          </p>
-          <p className="hero-description">
-            Real-time audio feedback, interactive chord diagrams, scale patterns,
-            randomized practice sessions, and progress tracking — all running in your
-            browser. No subscription. No app store. Just you, your guitar, and the
-            Web Audio API.
-          </p>
-          <div className="hero-actions">
-            <Link to="/tuner" className="btn btn-primary">
-              🎵 Tune Your Guitar
-            </Link>
-            <Link to="/practice" className="btn btn-outline">
-              🔥 Start Practicing
-            </Link>
-          </div>
-        </div>
-
-        <div className="features-grid">
-          <div className="card feature-card">
-            <div className="feature-icon">🎵</div>
-            <h3>Chromatic Tuner</h3>
-            <p>Tune by ear with real-time pitch detection through your browser mic. No app needed.</p>
-          </div>
-          <div className="card feature-card">
-            <div className="feature-icon">🤘</div>
-            <h3>Chord Library</h3>
-            <p>Interactive diagrams for open chords, barre chords, and power chords with finger placement guides.</p>
-          </div>
-          <div className="card feature-card">
-            <div className="feature-icon">🔥</div>
-            <h3>Practice Engine</h3>
-            <p>Random chord progressions at your skill level. FretForge listens and tells you if you nailed it.</p>
-          </div>
-          <div className="card feature-card">
-            <div className="feature-icon">🎼</div>
-            <h3>Scale Patterns</h3>
-            <p>Pentatonic, blues, major, and minor scales displayed on an interactive fretboard.</p>
-          </div>
-          <div className="card feature-card">
-            <div className="feature-icon">⏱</div>
-            <h3>Metronome</h3>
-            <p>Sample-accurate BPM metronome using Web Audio API scheduling — no drift, ever.</p>
-          </div>
-          <div className="card feature-card">
-            <div className="feature-icon">📊</div>
-            <h3>Progress Tracking</h3>
-            <p>XP, streaks, achievements, and practice history. Watch yourself level up over weeks and months.</p>
-          </div>
-        </div>
-
-        <div className="open-source-banner card">
-          <p className="mono" style={{ color: "var(--accent-primary)", fontWeight: 600 }}>
-            {">"} cat LICENSE
-          </p>
-          <p>
-            FretForge is <strong>MIT licensed</strong> and open source. Built with the PERN stack
-            (PostgreSQL, Express, React, Node.js) and powered by the Web Audio API. Contributions welcome.
-          </p>
-          <a
-            href="https://github.com/TzvetomirTodorov/FretForge"
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-outline"
-            style={{ marginTop: 16 }}
-          >
-            ⚡ View on GitHub
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
+// ─── Home Page (now uses dedicated LandingPage component) ────
+function Home() { return <LandingPage />; }
 
 // ─── Placeholder Pages ───────────────────────────────────────
 function Tuner() { return <TunerPage />; }
