@@ -36,15 +36,32 @@ router.post("/", async (req, res) => {
 });
 
 // ─── PATCH /:id/end — End a session with results ────────────
+// AUDIT FIX: Verify the session belongs to the requesting user
+// before allowing updates (prevents IDOR vulnerability)
 router.patch("/:id/end", async (req, res) => {
   try {
     const { totalChords, correctChords } = req.body;
+
+    // First verify this session belongs to the authenticated user
+    const session = await prisma.practiceSession.findUnique({
+      where: { id: req.params.id },
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    if (session.userId !== req.userId) {
+      return res.status(403).json({ error: "Not authorized to modify this session" });
+    }
+    if (session.endedAt) {
+      return res.status(400).json({ error: "Session already ended" });
+    }
 
     // Calculate XP: 10 per correct chord + 5 bonus per 80%+ accuracy
     const accuracy = totalChords > 0 ? correctChords / totalChords : 0;
     const xpEarned = (correctChords * 10) + (accuracy >= 0.8 ? totalChords * 5 : 0);
 
-    const session = await prisma.practiceSession.update({
+    const updatedSession = await prisma.practiceSession.update({
       where: { id: req.params.id },
       data: {
         endedAt: new Date(),
@@ -83,7 +100,7 @@ router.patch("/:id/end", async (req, res) => {
       },
     });
 
-    res.json({ session, xpEarned, newStreak, newLevel, newXp });
+    res.json({ session: updatedSession, xpEarned, newStreak, newLevel, newXp });
   } catch (err) {
     console.error("End session error:", err);
     res.status(500).json({ error: "Failed to end session" });
