@@ -89,7 +89,7 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
 
   return (
     <div className="tuning-meter" style={styles.container}>
-      <svg viewBox="0 0 400 300" style={styles.svg}>
+      <svg viewBox="0 0 400 320" style={styles.svg}>
         <defs>
           {/* Glow filter for the needle and active arc */}
           <filter id="needleGlow" x="-50%" y="-50%" width="200%" height="200%">
@@ -210,11 +210,11 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
         {/* Note display — big and centered */}
         <text
           x={cx}
-          y={cy + 52}
+          y={cy + 48}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={isActive && note ? colors.text : "#475569"}
-          fontSize="48"
+          fontSize="44"
           fontFamily="'Space Grotesk', sans-serif"
           fontWeight="700"
           filter={tuningStatus === "in-tune" ? "url(#softGlow)" : undefined}
@@ -226,11 +226,11 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
         {/* Cents display */}
         <text
           x={cx}
-          y={cy + 82}
+          y={cy + 76}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={isActive && note ? colors.text : "#475569"}
-          fontSize="16"
+          fontSize="14"
           fontFamily="'JetBrains Mono', monospace"
           fontWeight="500"
           opacity="0.8"
@@ -242,11 +242,11 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
         {/* Status label */}
         <text
           x={cx}
-          y={285}
+          y={cy + 100}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={colors.text}
-          fontSize="14"
+          fontSize="13"
           fontFamily="'JetBrains Mono', monospace"
           fontWeight="600"
           letterSpacing="0.5"
