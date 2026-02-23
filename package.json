@@ -1,0 +1,32 @@
+{
+  "name": "fretforge",
+  "version": "0.1.0",
+  "description": "Open-source browser-based guitar learning companion with real-time audio feedback",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "npm run dev --workspace=client",
+    "dev:server": "npm run dev --workspace=server",
+    "build": "npm run build --workspace=client && npm run build --workspace=server",
+    "start": "npm run start --workspace=server",
+    "db:migrate": "npm run migrate --workspace=server",
+    "db:seed": "npm run seed --workspace=server",
+    "db:studio": "npm run studio --workspace=server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TzvetomirTodorov/FretForge.git"
+  },
+  "author": "Tzvetomir Todorov",
+  "license": "MIT"
+}
