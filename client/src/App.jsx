@@ -1,19 +1,25 @@
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 import TunerPage from "./pages/TunerPage.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
 
 // ═══════════════════════════════════════════════════════════════
 //  FretForge — Main Application Shell
-//  Routes: Home, Tuner, Practice, Chords, Scales
-//  Phase 1 MVP: Tuner + Chord Library + Practice Engine
+//  Routes: Home, Tuner, Practice, Chords, Scales, Auth
+//  AuthProvider wraps the entire app for global auth state
+//  AUDIT: Auth-aware nav shows user menu when logged in,
+//  login prompt when not. All features work without login —
+//  auth is optional and only required for progress tracking.
 // ═══════════════════════════════════════════════════════════════
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 // ─── Navigation ──────────────────────────────────────────────
 function Nav() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const links = [
     { path: "/", label: "Home", icon: "🎸" },
@@ -22,6 +28,12 @@ function Nav() {
     { path: "/practice", label: "Practice", icon: "🔥" },
     { path: "/scales", label: "Scales", icon: "🎼" },
   ];
+
+  const handleLogout = () => {
+    logout();
+    setUserMenuOpen(false);
+    navigate("/");
+  };
 
   return (
     <nav className="nav">
@@ -43,6 +55,42 @@ function Nav() {
               {link.label}
             </Link>
           ))}
+
+          {/* Auth section in nav */}
+          {isAuthenticated ? (
+            <div className="nav-user-wrapper">
+              <button
+                className="nav-user-btn"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+              >
+                <span className="nav-user-avatar">
+                  {user.username?.[0]?.toUpperCase() || "?"}
+                </span>
+                <span className="nav-user-name">{user.username}</span>
+                <span className="nav-user-level">Lv{user.level}</span>
+              </button>
+
+              {userMenuOpen && (
+                <div className="nav-user-dropdown">
+                  <div className="nav-user-info">
+                    <span className="nav-user-info-name">{user.username}</span>
+                    <span className="nav-user-info-email">{user.email}</span>
+                  </div>
+                  <div className="nav-user-stats">
+                    <span>⚡ {user.xp} XP</span>
+                    <span>🔥 {user.currentStreak} day streak</span>
+                  </div>
+                  <button className="nav-user-logout" onClick={handleLogout}>
+                    Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link to="/auth" className="nav-link nav-auth-link">
+              Sign In
+            </Link>
+          )}
         </div>
 
         {/* Mobile hamburger */}
@@ -64,14 +112,35 @@ function Nav() {
               <span>{link.icon}</span> {link.label}
             </Link>
           ))}
+          {isAuthenticated ? (
+            <>
+              <div className="nav-mobile-user-info">
+                <span>👤 {user.username} · Lv{user.level}</span>
+                <span>⚡ {user.xp} XP</span>
+              </div>
+              <button
+                className="nav-mobile-link"
+                onClick={() => { handleLogout(); setMenuOpen(false); }}
+                style={{ border: "none", background: "none", cursor: "pointer", textAlign: "left", width: "100%" }}
+              >
+                <span>🚪</span> Sign Out
+              </button>
+            </>
+          ) : (
+            <Link to="/auth" className="nav-mobile-link" onClick={() => setMenuOpen(false)}>
+              <span>🔑</span> Sign In / Register
+            </Link>
+          )}
         </div>
       )}
     </nav>
   );
 }
 
-// ─── Home Page (placeholder — will be the landing page) ──────
+// ─── Home Page ───────────────────────────────────────────────
 function Home() {
+  const { isAuthenticated, user } = useAuth();
+
   return (
     <div className="page home">
       <div className="container">
@@ -81,7 +150,9 @@ function Home() {
             FretForge
           </h1>
           <p className="hero-subtitle mono">
-            Open-source guitar learning companion
+            {isAuthenticated
+              ? `Welcome back, ${user.username} — Lv${user.level} · ${user.xp} XP`
+              : "Open-source guitar learning companion"}
           </p>
           <p className="hero-description">
             Real-time audio feedback, interactive chord diagrams, scale patterns,
@@ -99,7 +170,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Feature cards */}
         <div className="features-grid">
           <div className="card feature-card">
             <div className="feature-icon">🎵</div>
@@ -156,82 +226,77 @@ function Home() {
   );
 }
 
-// ─── Placeholder Pages (will be built out in Phase 1) ────────
-function Tuner() {
-  return <TunerPage />;
-}
+// ─── Placeholder Pages ───────────────────────────────────────
+function Tuner() { return <TunerPage />; }
 
 function Chords() {
   return (
-    <div className="page">
-      <div className="container">
-        <h2>🤘 Chord Library</h2>
-        <p className="mono" style={{ color: "var(--text-muted)" }}>
-          Phase 1 — Coming soon. Interactive chord diagrams with fretboard display.
-        </p>
-      </div>
-    </div>
+    <div className="page"><div className="container">
+      <h2>🤘 Chord Library</h2>
+      <p className="mono" style={{ color: "var(--text-muted)" }}>Phase 1 — Coming soon. Interactive chord diagrams with fretboard display.</p>
+    </div></div>
   );
 }
 
 function Practice() {
   return (
-    <div className="page">
-      <div className="container">
-        <h2>🔥 Practice Engine</h2>
-        <p className="mono" style={{ color: "var(--text-muted)" }}>
-          Phase 2 — Coming soon. Random chord progressions with audio detection feedback.
-        </p>
-      </div>
-    </div>
+    <div className="page"><div className="container">
+      <h2>🔥 Practice Engine</h2>
+      <p className="mono" style={{ color: "var(--text-muted)" }}>Phase 2 — Coming soon. Random chord progressions with audio detection feedback.</p>
+    </div></div>
   );
 }
 
 function Scales() {
   return (
-    <div className="page">
-      <div className="container">
-        <h2>🎼 Scale Patterns</h2>
-        <p className="mono" style={{ color: "var(--text-muted)" }}>
-          Phase 2 — Coming soon. Interactive scale patterns on the fretboard.
-        </p>
-      </div>
-    </div>
+    <div className="page"><div className="container">
+      <h2>🎼 Scale Patterns</h2>
+      <p className="mono" style={{ color: "var(--text-muted)" }}>Phase 2 — Coming soon. Interactive scale patterns on the fretboard.</p>
+    </div></div>
   );
 }
 
 // ─── App Shell ───────────────────────────────────────────────
+function AppContent() {
+  return (
+    <div className="app">
+      <Nav />
+      <main className="main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/tuner" element={<Tuner />} />
+          <Route path="/chords" element={<Chords />} />
+          <Route path="/practice" element={<Practice />} />
+          <Route path="/scales" element={<Scales />} />
+          <Route path="/auth" element={<AuthPage />} />
+        </Routes>
+      </main>
+      <footer className="footer">
+        <div className="container">
+          <p className="mono">
+            <span style={{ color: "var(--accent-primary)" }}>const</span> builtWith ={" "}
+            <span style={{ color: "var(--accent-secondary)" }}>{"{"}</span>{" "}
+            PERN, Web Audio API, open source love{" "}
+            <span style={{ color: "var(--accent-secondary)" }}>{"}"}</span>;
+          </p>
+          <p style={{ marginTop: 4, fontSize: 11, color: "var(--text-muted)" }}>
+            © {new Date().getFullYear()} FretForge — MIT License —{" "}
+            <a href="https://github.com/TzvetomirTodorov/FretForge" target="_blank" rel="noreferrer">GitHub</a>
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+// AuthProvider must be inside Router (useNavigate needs Router context)
+// but must wrap AppContent so Nav can use useAuth()
 export default function App() {
   return (
     <Router>
-      <div className="app">
-        <Nav />
-        <main className="main">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/tuner" element={<Tuner />} />
-            <Route path="/chords" element={<Chords />} />
-            <Route path="/practice" element={<Practice />} />
-            <Route path="/scales" element={<Scales />} />
-          </Routes>
-        </main>
-        <footer className="footer">
-          <div className="container">
-            <p className="mono">
-              <span style={{ color: "var(--accent-primary)" }}>const</span> builtWith ={" "}
-              <span style={{ color: "var(--accent-secondary)" }}>{"{"}</span>{" "}
-              PERN, Web Audio API, open source love{" "}
-              <span style={{ color: "var(--accent-secondary)" }}>{"}"}</span>;
-            </p>
-            <p style={{ marginTop: 4, fontSize: 11, color: "var(--text-muted)" }}>
-              © {new Date().getFullYear()} FretForge — MIT License —{" "}
-              <a href="https://github.com/TzvetomirTodorov/FretForge" target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-            </p>
-          </div>
-        </footer>
-      </div>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   );
 }
