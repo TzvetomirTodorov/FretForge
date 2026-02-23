@@ -17,4 +17,12 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: true,
   },
+  // ─── Vitest Configuration ──────────────────────────────────
+  // Runs client-side unit tests via `npm test` in the client workspace
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/__tests__/setup.js"],
+    include: ["src/__tests__/**/*.test.{js,jsx}"],
+  },
 });
