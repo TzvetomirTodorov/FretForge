@@ -5,6 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon src/index.js",
+    "build": "npx prisma generate",
     "start": "node src/index.js",
     "migrate": "npx prisma migrate dev",
     "seed": "node prisma/seed.js",
