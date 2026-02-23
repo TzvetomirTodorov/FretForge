@@ -1,0 +1,135 @@
+// ═══════════════════════════════════════════════════════════════
+//  FretForge — Database Schema
+//  PostgreSQL via Prisma ORM
+//  Tracks users, practice sessions, chord/scale progress, and achievements
+// ═══════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ───────────────────────────────────────────────────
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String   // bcrypt hashed
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Gamification
+  xp            Int @default(0)
+  level         Int @default(1)
+  currentStreak Int @default(0) @map("current_streak")
+  longestStreak Int @default(0) @map("longest_streak")
+  lastPractice  DateTime? @map("last_practice")
+
+  // Preferences
+  skillTier     Int    @default(1) @map("skill_tier") // 1=beginner, 2=intermediate, 3=advanced
+  preferredBpm  Int    @default(80) @map("preferred_bpm")
+
+  // Relations
+  sessions     PracticeSession[]
+  chordProgress ChordProgress[]
+  scaleProgress ScaleProgress[]
+  achievements  UserAchievement[]
+
+  @@map("users")
+}
+
+// ─── Practice Sessions ───────────────────────────────────────
+// Each time a user sits down to practice, a session is created
+model PracticeSession {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  startedAt DateTime @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+
+  // What they practiced
+  type      SessionType // chord_practice, scale_practice, tuner, free_play
+  bpm       Int?        // Metronome BPM used during session
+
+  // Results
+  totalChords    Int @default(0) @map("total_chords")    // Chords attempted
+  correctChords  Int @default(0) @map("correct_chords")  // Chords played correctly
+  xpEarned       Int @default(0) @map("xp_earned")
+
+  // Progression used (JSON string of chord names)
+  progression String? // e.g. '["G", "C", "D", "Em"]'
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("practice_sessions")
+}
+
+enum SessionType {
+  chord_practice
+  scale_practice
+  tuner
+  free_play
+}
+
+// ─── Chord Progress ──────────────────────────────────────────
+// Tracks mastery of individual chords over time
+model ChordProgress {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  chordName String   @map("chord_name") // "Em", "Am", "G", etc.
+
+  // Mastery tracking
+  attempts    Int @default(0)
+  successes   Int @default(0)
+  // Mastery = successes / attempts, tracked server-side
+  masteryPct  Float @default(0) @map("mastery_pct") // 0.0 to 1.0
+
+  // Best streak of correct plays
+  bestStreak  Int @default(0) @map("best_streak")
+
+  lastPracticed DateTime? @map("last_practiced")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chordName])
+  @@map("chord_progress")
+}
+
+// ─── Scale Progress ──────────────────────────────────────────
+model ScaleProgress {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  scaleKey  String   @map("scale_key") // e.g. "em_pentatonic_open"
+
+  attempts  Int @default(0)
+  successes Int @default(0)
+  masteryPct Float @default(0) @map("mastery_pct")
+
+  lastPracticed DateTime? @map("last_practiced")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, scaleKey])
+  @@map("scale_progress")
+}
+
+// ─── Achievements ────────────────────────────────────────────
+// Unlockable badges that reward milestones
+model UserAchievement {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  achievementKey String   @map("achievement_key") // "first_chord", "7_day_streak", etc.
+  unlockedAt     DateTime @default(now()) @map("unlocked_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementKey])
+  @@map("user_achievements")
+}
