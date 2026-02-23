@@ -89,7 +89,7 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
 
   return (
     <div className="tuning-meter" style={styles.container}>
-      <svg viewBox="0 0 400 320" style={styles.svg}>
+      <svg viewBox="0 0 400 350" style={styles.svg}>
         <defs>
           {/* Glow filter for the needle and active arc */}
           <filter id="needleGlow" x="-50%" y="-50%" width="200%" height="200%">
@@ -210,7 +210,7 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
         {/* Note display — big and centered */}
         <text
           x={cx}
-          y={cy + 48}
+          y={cy + 55}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={isActive && note ? colors.text : "#475569"}
@@ -226,7 +226,7 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
         {/* Cents display */}
         <text
           x={cx}
-          y={cy + 76}
+          y={cy + 95}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={isActive && note ? colors.text : "#475569"}
@@ -242,7 +242,7 @@ export default function TuningMeter({ cents = 0, isActive = false, note = null }
         {/* Status label */}
         <text
           x={cx}
-          y={cy + 100}
+          y={cy + 118}
           textAnchor="middle"
           dominantBaseline="middle"
           fill={colors.text}
