@@ -1,8 +1,8 @@
 import { useCallback, useState, useEffect, useRef } from "react";
-import { useAudio } from "../../hooks/useAudio";
-import { usePitch } from "../../hooks/usePitch";
-import TuningMeter from "../../components/audio/TuningMeter";
-import StringDisplay from "../../components/audio/StringDisplay";
+import { useAudio } from "../hooks/useAudio";
+import { usePitch } from "../hooks/usePitch";
+import TuningMeter from "../components/audio/TuningMeter";
+import StringDisplay from "../components/audio/StringDisplay";
 
 // ═══════════════════════════════════════════════════════════════
 //  FretForge — Tuner Page
