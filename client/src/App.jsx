@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { useAuth } from "../hooks/useAuth.jsx";
 import TunerPage from "./pages/TunerPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
