@@ -1,0 +1,83 @@
+# ═══════════════════════════════════════════════════════════════
+#  FretForge — CI Pipeline
+#  Runs on every push and pull request to main
+#  Steps: install → lint imports → server tests → client tests → build
+#  If any step fails, the check blocks merge.
+# ═══════════════════════════════════════════════════════════════
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      # ─── Setup ──────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ─── Import Path Lint ───────────────────────────────
+      # Catches the ../../ vs ../ bugs that have burned us before
+      - name: Lint import paths
+        run: |
+          echo "Checking for bad import paths in client/src/pages/..."
+          BAD_IMPORTS=$(grep -rn "from ['\"]\.\.\/\.\.\/" client/src/pages/ || true)
+          if [ -n "$BAD_IMPORTS" ]; then
+            echo "❌ Found ../../ imports in pages/ (should be ../):"
+            echo "$BAD_IMPORTS"
+            exit 1
+          fi
+          echo "✅ All import paths look correct"
+
+      # ─── Check JSX Extensions ───────────────────────────
+      # Any .js file containing JSX will fail Vite build
+      - name: Check JSX file extensions
+        run: |
+          echo "Checking that all files with JSX use .jsx extension..."
+          BAD_EXT=$(find client/src -name "*.js" -exec grep -l "<[A-Z][a-zA-Z]*" {} \; || true)
+          if [ -n "$BAD_EXT" ]; then
+            echo "❌ Found .js files containing JSX (rename to .jsx):"
+            echo "$BAD_EXT"
+            exit 1
+          fi
+          echo "✅ All JSX files have .jsx extension"
+
+      # ─── Server Tests ───────────────────────────────────
+      - name: Run server tests
+        run: npm run test:ci --workspace=server
+        env:
+          JWT_SECRET: ci-test-secret
+          NODE_ENV: test
+          CLIENT_URL: http://localhost:5173
+
+      # ─── Client Tests ───────────────────────────────────
+      - name: Run client tests
+        run: npm run test:ci --workspace=client
+
+      # ─── Build ──────────────────────────────────────────
+      # The ultimate check: if it builds, it ships
+      - name: Build client
+        run: npm run build --workspace=client
+
+      - name: Generate Prisma client
+        run: npm run build --workspace=server
