@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import TunerPage from "./pages/TunerPage.jsx";
 
 // ═══════════════════════════════════════════════════════════════
 //  FretForge — Main Application Shell
@@ -157,16 +158,7 @@ function Home() {
 
 // ─── Placeholder Pages (will be built out in Phase 1) ────────
 function Tuner() {
-  return (
-    <div className="page">
-      <div className="container">
-        <h2>🎵 Chromatic Tuner</h2>
-        <p className="mono" style={{ color: "var(--text-muted)" }}>
-          Phase 1 — Coming soon. Will use the useAudio + usePitch hooks.
-        </p>
-      </div>
-    </div>
-  );
+  return <TunerPage />;
 }
 
 function Chords() {
