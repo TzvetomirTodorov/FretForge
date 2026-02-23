@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { AuthProvider, useAuth } from '../hooks/useAuth'
 
 // ═══════════════════════════════════════════════════════════════
 //  FretForge — Landing Page
